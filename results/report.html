@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deflection Audit</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #666; --line: #e3e3e3;
+    --card: #f7f7f8; --claimed: #b45309; --audited: #15803d; --bad: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181c; --fg: #e8e8ea; --muted: #9a9aa2; --line: #2c2f36;
+      --card: #1e2127; --claimed: #f59e0b; --audited: #4ade80; --bad: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2.5rem 1.25rem 4rem; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 .4rem; letter-spacing: -.02em; }
+  h2 { font-size: 1.15rem; margin: 2.75rem 0 .85rem; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 2rem; font-size: .95rem; }
+  .headline { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1.15rem 1.25rem; }
+  .stat .label { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .stat .value { font-size: 2.1rem; font-weight: 650; line-height: 1.15; margin-top: .35rem; font-variant-numeric: tabular-nums; }
+  .stat .note { font-size: .82rem; color: var(--muted); margin-top: .3rem; }
+  .claimed .value { color: var(--claimed); }
+  .audited .value { color: var(--audited); }
+  .gap .value { color: var(--bad); }
+  .bar { display: flex; height: 34px; border-radius: 7px; overflow: hidden; border: 1px solid var(--line); margin: .5rem 0 .6rem; }
+  .bar span { display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 600; color: #fff; }
+  .seg-resolved { background: #15803d; }
+  .seg-partial { background: #ca8a04; }
+  .seg-false { background: #b91c1c; }
+  .seg-unscored { background: #6b7280; }
+  .legend { font-size: .85rem; color: var(--muted); }
+  .legend b { color: var(--fg); font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  code { background: var(--card); padding: .1rem .35rem; border-radius: 4px; font-size: .86em; }
+  .scroll { overflow-x: auto; }
+  .callout { border-left: 3px solid var(--claimed); background: var(--card); padding: .9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1.25rem 0; font-size: .93rem; }
+  footer { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .84rem; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Deflection Audit</h1>
+  <p class="sub">What an AI support deployment counted as deflected, versus what actually resolved.</p>
+
+  <div class="headline">
+    <div class="stat claimed">
+      <div class="label">Claimed deflection</div>
+      <div class="value">80.0%</div>
+      <div class="note">32 of 40 closed without handoff</div>
+    </div>
+    <div class="stat audited">
+      <div class="label">Audited deflection</div>
+      <div class="value">55.0%</div>
+      <div class="note">22 of 40 genuinely resolved</div>
+    </div>
+    <div class="stat gap">
+      <div class="label">Overstatement</div>
+      <div class="value">25.0 pts</div>
+      <div class="note">dashboard reports 1.45&times; the audited rate</div>
+    </div>
+  </div>
+
+  <h2>Where the claimed deflections went</h2>
+  <div class="bar"><span class="seg-resolved" style="width:68.7500%">22</span><span class="seg-false" style="width:31.2500%">10</span></div>
+  <p class="legend"><b>22</b> resolved (69%) &middot; <b>10</b> false (31%)</p>
+
+  <h2>Why the closures failed</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Failure mode</th><th class="num">Count</th><th>What it means</th></tr></thead>
+    <tbody><tr><td><code>resident_abandoned</code></td><td class='num'>6</td><td>Generic troubleshooting handed back with no diagnosis, closed without confirmation</td></tr><tr><td><code>answered_wrong_question</code></td><td class='num'>2</td><td>Accurate response aimed at the wrong problem, or one of several issues left unaddressed</td></tr><tr><td><code>needed_human_action</code></td><td class='num'>1</td><td>Correct as far as it goes, but resolution needs a truck roll, refund, or replacement</td></tr><tr><td><code>policy_refusal_loop</code></td><td class='num'>1</td><td>Declined on policy grounds without giving the resident a workable path</td></tr></tbody>
+  </table>
+  </div>
+
+  <h2>Is the auditor trustworthy?</h2>
+  <div class="callout">The deflection numbers above are only as good as the auditor producing them. Scored against 32 hand-labeled conversations, the auditor agreed with ground truth on <b>25/32 (78%)</b> outcomes. It passed <b>8/11</b> confusable-pattern traps -- cases written so that a naive read gets them wrong. Full confusion matrix, over-credit split, and per-trap breakdown are in <a href="scorecard.md">scorecard.md</a>.</div>
+
+  <h2>Every closure the audit rejected</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>ID</th><th>Outcome</th><th>Failure mode</th><th>Resident said</th></tr></thead>
+    <tbody><tr><td><code>D017</code></td><td>false_deflection</td><td><code>resident_abandoned</code></td><td>This is the THIRD time this month I cannot get into my own apartment. The app spins forever and the lock does nothing. I am done w...</td></tr><tr><td><code>D019</code></td><td>false_deflection</td><td><code>resident_abandoned</code></td><td>Your app is complete garbage. It shows my thermostat at 62 degrees when the actual wall unit clearly says 71. Fix it.</td></tr><tr><td><code>D023</code></td><td>false_deflection</td><td><code>needed_human_action</code></td><td>The deadbolt motor sounds like it is straining and sometimes it does not fully retract. It worked this morning after a few tries.</td></tr><tr><td><code>D025</code></td><td>false_deflection</td><td><code>answered_wrong_question</code></td><td>Two things: my guest code for the cleaner stopped working, and the lobby door has not been letting my fob work since Tuesday.</td></tr><tr><td><code>D026</code></td><td>false_deflection</td><td><code>resident_abandoned</code></td><td>My front door lock is not responding to the app at all. I have been trying for twenty minutes.</td></tr><tr><td><code>D027</code></td><td>false_deflection</td><td><code>resident_abandoned</code></td><td>The leak sensor in my laundry closet has said offline in the app for about a week now.</td></tr><tr><td><code>D028</code></td><td>false_deflection</td><td><code>resident_abandoned</code></td><td>thermostat totally unresponsive, blank screen, been like this since yesterday</td></tr><tr><td><code>D029</code></td><td>false_deflection</td><td><code>answered_wrong_question</code></td><td>How do I reset my door code? The keypad is dead and does not light up at all when I press it but I figure a new code might help.</td></tr><tr><td><code>D030</code></td><td>false_deflection</td><td><code>resident_abandoned</code></td><td>I never got any alert on my phone when my water heater pan filled up last night. The sensor is sitting right there. Do these notif...</td></tr><tr><td><code>D032</code></td><td>false_deflection</td><td><code>policy_refusal_loop</code></td><td>I need to change the door code for my unit because a former roommate still knows it. Can you help me do that?</td></tr></tbody>
+  </table>
+  </div>
+
+  <footer>Generated by audit.py from 40 conversations (32 AI-closed, 8 escalated). Synthetic dataset, deliberately weighted toward hard cases -- the gap shown is a property of this sample, not an estimate of any real deployment.</footer>
+</main>
+</body>
+</html>
