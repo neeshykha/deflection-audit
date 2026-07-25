@@ -5,3 +5,6 @@ __pycache__/
 
 # predictions.jsonl is deliberately NOT ignored -- committing it is what lets
 # `python audit.py --replay` reproduce the results with no API calls.
+
+# local working notes, not for the public repo
+CLAUDE.local.md
