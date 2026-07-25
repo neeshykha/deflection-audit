@@ -100,12 +100,8 @@ def main() -> None:
     parser.add_argument("--model", default="sonnet")
     args = parser.parse_args()
 
-    if args.retry_failed and PREDICTIONS_PATH.exists():
-        rows = [json.loads(line) for line in PREDICTIONS_PATH.open()]
-        keep = [r for r in rows if "error" not in r]
-        dropped = len(rows) - len(keep)
-        PREDICTIONS_PATH.write_text("".join(json.dumps(r) + "\n" for r in keep))
-        print(f"Dropped {dropped} failed rows; {len(keep)} kept.", file=sys.stderr)
+    if args.retry_failed and args.replay:
+        sys.exit("--retry-failed reclassifies; it cannot be combined with --replay.")
 
     records = load_jsonl(DATA_PATH)
     population = deflection.audit_population(list(records.values()))
@@ -117,7 +113,7 @@ def main() -> None:
         print(f"Replaying {PREDICTIONS_PATH.name} -- no API calls.", file=sys.stderr)
     else:
         classifier = BlindClassifier(PROMPT_TEMPLATE, model=args.model, cwd=ROOT)
-        classifier.run(population, PREDICTIONS_PATH)
+        classifier.run(population, PREDICTIONS_PATH, retry_failed=args.retry_failed)
 
     predictions = load_jsonl(PREDICTIONS_PATH)
     errors = [pid for pid, p in predictions.items() if "error" in p]
